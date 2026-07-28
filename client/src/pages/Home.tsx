@@ -233,7 +233,7 @@ export default function Home() {
             }}
           >
             <a
-              href="https://discord.gg/community-shelby"
+              href="https://discord.gg/7ZwTGwxXte"
               target="_blank"
               rel="noopener noreferrer"
               style={{
