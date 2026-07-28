@@ -1,52 +1,91 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Design: Overlay invisível sobre o site freefireproxy.com.br/ativar
-// O iframe carrega o site original e um overlay cobre apenas a área do botão CANAL (WhatsApp)
+// Cobre o botão CANAL + espaço até o footer + footer, sem afetar CERTIFICADO
 //
-// Coordenadas medidas diretamente na página freefireproxy.com.br/ativar:
-// Viewport: 1280x1100
-// Botão CANAL: left=646px (50.47%), top=723px (65.73%), width=185px, height=49px
-// Botão CERTIFICADO: left=449px (35.08%), top=723px (65.73%), width=185px, height=49px
+// Coordenadas medidas (viewport 1280x1100):
+// CANAL: left=646px (50.47%), top=723px (65.73%), width=185px (14.45%), height=49px (4.45%)
+// CERTIFICADO right edge: 634px (49.53%) — gap entre CERT e CANAL: ~12px
+// Footer: left=416px (32.5%), top=837px (76.09%), width=448px (35%), height=15px (1.36%)
+// Espaço entre CANAL bottom (70.18%) e footer top (76.09%) = ~6% de gap
+//
+// Estratégia: 3 overlays empilhados verticalmente:
+// 1. CANAL overlay (top do CANAL)
+// 2. Gap overlay (espaço entre CANAL e footer) — mais largo para cobrir a base do card
+// 3. Footer overlay (texto do footer) — mais largo e centrado
 
 export default function Home() {
   const [iframeReady, setIframeReady] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIframeReady(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
+  // Forçar scroll do iframe para o topo periodicamente (bloqueia scroll)
+  useEffect(() => {
+    const handler = () => {
+      if (iframeRef.current) {
+        iframeRef.current.scrollTop = 0;
+      }
+    };
+    const interval = setInterval(handler, 300);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background">
-      {/* Iframe do site original — ocupa toda a tela */}
+      {/* Iframe do site original — ocupa toda a tela, scroll desabilitado */}
       <iframe
+        ref={iframeRef}
         src="https://freefireproxy.com.br/ativar"
         className="h-full w-full border-0"
         title="Painel de Ativação"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        scrolling="no"
       />
 
-      {/* Overlay que cobre o botão CANAL (WhatsApp) */}
       {iframeReady && (
-        <div
-          className="absolute pointer-events-auto z-50"
-          style={{
-            // Coordenadas medidas: left=50.47%, top=65.73% do viewport 1280x1100
-            // Usando left exato do botão CANAL (646px / 1280px = 50.47%)
-            // e width exato (185px / 1280px = 14.45%)
-            top: "65.73%",
-            left: "50.47%",
-            width: "14.45%",
-            maxWidth: "200px",
-            minWidth: "160px",
-            height: "4.45%",
-            maxHeight: "54px",
-            minHeight: "44px",
-            // Cor do fundo do card do site original (dark navy)
-            background: "rgb(13, 16, 35)",
-            borderRadius: "0 8px 8px 0",
-          }}
-        />
+        <>
+          {/* 1. Overlay CANAL — cobre exatamente o botão CANAL */}
+          <div
+            className="absolute pointer-events-auto z-50"
+            style={{
+              top: "65.73%",
+              left: "50.47%",
+              width: "14.45%",
+              height: "4.45%",
+              background: "rgb(13, 16, 35)",
+              borderRadius: "0 8px 8px 0",
+            }}
+          />
+
+          {/* 2. Overlay gap — preenche o espaço entre CANAL bottom e footer top */}
+          {/* Usa largura do CANAL para manter alinhamento */}
+          <div
+            className="absolute pointer-events-auto z-50"
+            style={{
+              top: "calc(65.73% + 4.45%)",
+              left: "50.47%",
+              width: "14.45%",
+              height: "calc(76.09% - 65.73% - 4.45%)",
+              background: "rgb(13, 16, 35)",
+            }}
+          />
+
+          {/* 3. Overlay footer — cobre o texto "Proxy iOS 2026" */}
+          <div
+            className="absolute pointer-events-auto z-50"
+            style={{
+              top: "76.09%",
+              left: "32.5%",
+              width: "35%",
+              height: "2.5%",
+              background: "rgb(8, 10, 25)",
+            }}
+          />
+        </>
       )}
 
       {/* Loading state */}
