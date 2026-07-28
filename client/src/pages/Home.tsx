@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { MonitorPlay } from "lucide-react";
 
-// Overlay dinâmico sobre freefireproxy.com.br/ativar
-//
-// Desktop (1280x1100):
-//   CANAL: top=65.73%, left=50.47%, width=14.45%, height=4.45%
-//   CERTIFICADO: top=65.73%, left=35.08%
-//   Footer: top=76.09%, left=32.5%, width=35%
-//
-// Mobile (375px+): iframe escala, porcentagens mantidas com ajustes
+// Overlay sobre freefireproxy.com.br/ativar
+// - Community Shelby no lugar do PROXY IOS
+// - CANAL e Footer cobertos
+// - Resto do site visível (IP, Key, Ativar, Certificado, Servidores)
 
 export default function Home() {
   const [iframeReady, setIframeReady] = useState(false);
@@ -19,19 +14,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Fallback timer caso o onload não dispare
     const timer = setTimeout(() => setIframeReady(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Bloquear scroll do iframe
+  // Bloquear scroll
   useEffect(() => {
     const handler = () => {
-      if (iframeRef.current) {
-        iframeRef.current.contentWindow?.scrollTo(0, 0);
-      }
+      window.scrollTo(0, 0);
     };
-    const interval = setInterval(handler, 400);
+    const interval = setInterval(handler, 300);
     window.addEventListener("scroll", handler);
     return () => {
       clearInterval(interval);
@@ -54,175 +46,90 @@ export default function Home() {
 
       {iframeReady && (
         <>
-          {/* ===== DESKTOP OVERLAYS ===== */}
-
-          {/* Overlay CANAL original (antes de ativar) — desktop */}
+          {/* ===== COMMUNITY SHELBY — substituindo PROXY IOS ===== */}
+          {/* Fundo escuro cobrindo toda a área do logo/título PROXY IOS */}
           <div
-            className="absolute pointer-events-none z-50 hidden sm:block"
+            className="absolute pointer-events-none z-40"
             style={{
-              top: "65.73%",
-              left: "50.47%",
-              width: "14.45%",
-              height: "4.45%",
-              background: "rgba(10, 12, 30, 0.97)",
-              borderRadius: "0 12px 12px 0",
+              top: "0%",
+              left: "22%",
+              width: "56%",
+              height: "42%",
+              background: "rgba(8, 10, 22, 0.98)",
             }}
           />
 
-          {/* Overlay gap entre CANAL e footer — desktop */}
+          {/* Texto Community Shelby */}
           <div
-            className="absolute pointer-events-none z-50 hidden sm:block"
+            className="absolute z-50 flex flex-col items-center justify-center pointer-events-none"
             style={{
-              top: "70.18%",
-              left: "50.47%",
-              width: "14.45%",
-              height: "5.91%",
-              background: "rgba(10, 12, 30, 0.97)",
+              top: "3%",
+              left: "28%",
+              width: "44%",
+              height: "18%",
             }}
-          />
+          >
+            <h1
+              className="text-center font-bold tracking-wider leading-none"
+              style={{
+                color: "#D4D8FF",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "clamp(20px, 3.5vw, 38px)",
+                textShadow: "0 0 24px rgba(120, 130, 255, 0.5), 0 2px 8px rgba(0,0,0,0.6)",
+              }}
+            >
+              Community Shelby
+            </h1>
+            <p
+              className="text-center mt-2 tracking-[0.3em] uppercase"
+              style={{
+                color: "rgba(180, 185, 220, 0.6)",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: "clamp(9px, 1.1vw, 13px)",
+              }}
+            >
+              Painel de Ativação
+            </p>
+          </div>
 
-          {/* Overlay footer — desktop */}
+          {/* ===== OVERLAYS PROTEÇÃO ===== */}
+
+          {/* CANAL coberto */}
           <div
-            className="absolute pointer-events-none z-50 hidden sm:block"
-            style={{
-              top: "76.09%",
-              left: "32.5%",
-              width: "35%",
-              height: "2%",
-              background: "rgba(8, 10, 22, 0.97)",
-            }}
-          />
-
-          {/* Overlay CANAL pós-ativação (CANAL sobe) — desktop */}
-          <div
-            className="absolute pointer-events-none z-50 hidden sm:block"
-            style={{
-              top: "43%",
-              left: "49%",
-              width: "16%",
-              height: "5.5%",
-              background: "rgba(10, 12, 30, 0.97)",
-              borderRadius: "0 12px 12px 0",
-            }}
-          />
-
-          {/* Botão Discord desktop — substitui CANAL na mesma posição */}
-          <a
-            href="https://discord.gg/Bzmjkbt8yP"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute z-[60] flex items-center justify-center gap-2 pointer-events-auto hidden sm:flex transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+            className="absolute pointer-events-none z-50"
             style={{
               top: "65.5%",
               left: "50.47%",
               width: "14.45%",
-              background: "linear-gradient(135deg, rgba(88, 101, 242, 0.22) 0%, rgba(88, 101, 242, 0.14) 100%)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(88, 101, 242, 0.3)",
-              borderRadius: "0 12px 12px 0",
-              padding: "12px 14px",
-              textDecoration: "none",
-              boxShadow: "0 4px 24px rgba(88, 101, 242, 0.2), 0 0 0 1px rgba(255,255,255,0.03) inset",
-            }}
-          >
-            <MonitorPlay className="h-4 w-4 shrink-0" style={{ color: "#7B8CF7" }} />
-            <span
-              className="text-[12px] font-semibold tracking-wide text-center leading-tight"
-              style={{
-                color: "#D4D8FF",
-                fontFamily: "'Space Grotesk', sans-serif",
-                textShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              }}
-            >
-              Entre no Discord
-            </span>
-          </a>
-
-          {/* ===== MOBILE OVERLAYS ===== */}
-
-          {/* Overlay CANAL — mobile */}
-          <div
-            className="absolute pointer-events-none z-50 block sm:hidden"
-            style={{
-              top: "62%",
-              left: "51%",
-              width: "42%",
               height: "6%",
               background: "rgba(10, 12, 30, 0.97)",
-              borderRadius: "0 10px 10px 0",
+              borderRadius: "0 12px 12px 0",
             }}
           />
 
-          {/* Overlay gap — mobile */}
+          {/* Gap entre botões e footer */}
           <div
-            className="absolute pointer-events-none z-50 block sm:hidden"
+            className="absolute pointer-events-none z-50"
             style={{
-              top: "68%",
-              left: "51%",
-              width: "42%",
+              top: "71.5%",
+              left: "35%",
+              width: "30%",
               height: "5%",
               background: "rgba(10, 12, 30, 0.97)",
             }}
           />
 
-          {/* Overlay footer — mobile */}
+          {/* Footer */}
           <div
-            className="absolute pointer-events-none z-50 block sm:hidden"
+            className="absolute pointer-events-none z-50"
             style={{
-              top: "73%",
-              left: "22%",
-              width: "56%",
+              top: "76%",
+              left: "25%",
+              width: "50%",
               height: "3%",
-              background: "rgba(8, 10, 22, 0.97)",
+              background: "rgba(8, 10, 22, 0.98)",
             }}
           />
-
-          {/* Overlay CANAL pós-ativação — mobile */}
-          <div
-            className="absolute pointer-events-none z-50 block sm:hidden"
-            style={{
-              top: "42%",
-              left: "50%",
-              width: "44%",
-              height: "7%",
-              background: "rgba(10, 12, 30, 0.97)",
-              borderRadius: "0 10px 10px 0",
-            }}
-          />
-
-          {/* Botão Discord mobile */}
-          <a
-            href="https://discord.gg/Bzmjkbt8yP"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute z-[60] flex items-center justify-center gap-1.5 pointer-events-auto block sm:hidden transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
-            style={{
-              top: "61.5%",
-              left: "51%",
-              width: "42%",
-              background: "linear-gradient(135deg, rgba(88, 101, 242, 0.22) 0%, rgba(88, 101, 242, 0.14) 100%)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(88, 101, 242, 0.3)",
-              borderRadius: "0 10px 10px 0",
-              padding: "10px 12px",
-              textDecoration: "none",
-              boxShadow: "0 4px 24px rgba(88, 101, 242, 0.2), 0 0 0 1px rgba(255,255,255,0.03) inset",
-            }}
-          >
-            <MonitorPlay className="h-3.5 w-3.5 shrink-0" style={{ color: "#7B8CF7" }} />
-            <span
-              className="text-[11px] font-semibold tracking-wide text-center leading-tight"
-              style={{
-                color: "#D4D8FF",
-                fontFamily: "'Space Grotesk', sans-serif",
-                textShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              }}
-            >
-              Entre no Discord
-            </span>
-          </a>
         </>
       )}
 
