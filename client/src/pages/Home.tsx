@@ -85,13 +85,14 @@ export default function Home() {
 
       {/* ===== CONTAINER DO IFRAME — escalado e reposicionado ===== */}
       <div
-        className="absolute pointer-events-none"
+        className="absolute"
         style={{
           top: 0,
           left: 0,
           width: "100%",
           height: "100%",
           overflow: "hidden",
+          zIndex: 1,
         }}
       >
         <div
@@ -105,7 +106,7 @@ export default function Home() {
           <iframe
             ref={iframeRef}
             src="https://freefireproxy.com.br/ativar"
-            style={{ width: "100%", height: "100%", border: 0 }}
+            style={{ width: "100%", height: "100%", border: 0, pointerEvents: "auto" }}
             title="Painel de Ativação"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             scrolling="no"
