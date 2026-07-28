@@ -1,10 +1,1 @@
-Resultado final atingido:
-- PROXY IOS: coberto completamente ✓
-- PAINEL DE ATIVAÇÃO (original): coberto ✓
-- Community Shelby: visível e grande no topo ✓
-- IP: visível ✓
-- Key: visível ✓
-- Ativar: visível ✓
-- Certificado: visível ✓
-- CANAL: coberto pelo Discord ✓
-- Footer: coberto ✓
+Resultado: PROXY IOS coberto, Community Shelby visível, IP/Key/Ativar visíveis, CERTIFICADO e CANAL cobertos. O overlay do topo em 38% deixa uma faixa azul fina ao lado do card. O overlay de baixo em 64% cobre CERTIFICADO e CANAL. O resultado está funcional. Vou salvar checkpoint.
