@@ -9,21 +9,51 @@ export default function Home() {
   const [keyboardShift, setKeyboardShift] = useState(0);
   const initialHeightRef = useRef(window.innerHeight);
 
+  // Detectar quando o WhatsApp aparece (após clicar em ATIVAR)
+  const [activatedState, setActivatedState] = useState(false);
+  const activationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const onIframeLoad = useCallback(() => {
     setIframeReady(true);
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIframeReady(true), 4000);
+    const timer = setTimeout(() => setIframeReady(true), 5000);
     return () => clearTimeout(timer);
   }, []);
 
+  // Detectar clique no botão Ativar ACESSO (via coordenadas do iframe)
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+    if (!iframeReady) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const rect = iframeRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const iframeWidth = rect.width;
+      const iframeHeight = rect.height;
+      const scaleX = x / iframeWidth;
+      const scaleY = y / iframeHeight;
+
+      // Botão ATIVAR ACESSO está no centro horizontal, ~44-49% vertical (relativo ao iframe)
+      if (scaleX > 0.25 && scaleX < 0.75 && scaleY > 0.42 && scaleY < 0.51) {
+        // Após ~800ms o WhatsApp deve subir
+        if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
+        activationTimerRef.current = setTimeout(() => {
+          setActivatedState(true);
+        }, 1000);
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+      if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
+    };
+  }, [iframeReady]);
 
   // Detectar quando o teclado virtual sobe (viewport encolhe)
   useEffect(() => {
@@ -49,6 +79,13 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Bloquear scroll
   useEffect(() => {
     const handler = () => window.scrollTo(0, 0);
@@ -65,18 +102,21 @@ export default function Home() {
   // Efeito do teclado nos overlays e iframe
   const keyboardEffect = keyboardShift > 0 ? keyboardShift : 0;
 
+  // Quando ativado (WhatsApp sobe), sobe os overlays junto
+  const activationEffect = activatedState ? 14 : 0;
+
   // Scale e translateY do iframe
   const scaleVal = isMobile ? 1.09 : 1.08;
   const translateYBase = isMobile ? -18 : -20;
-  const translateYTotal = translateYBase + keyboardEffect * 0.5;
+  const translateYTotal = translateYBase + keyboardEffect * 0.5 - activationEffect * 0.3;
 
   // Top overlay: cobre PROXY IOS + escudo
-  const topOverlayHeight = isMobile ? 28 - keyboardEffect * 0.3 : 26 - keyboardEffect * 0.3;
+  const topOverlayHeight = isMobile ? 28 - keyboardEffect * 0.3 - activationEffect * 0.2 : 26 - keyboardEffect * 0.3 - activationEffect * 0.2;
 
-  // Bottom overlay: começa logo após o card (Certificado visível)
+  // Bottom overlay: sobe quando WhatsApp aparece
   const bottomOverlayTop = isMobile
-    ? Math.max(50, 58 - keyboardEffect * 0.8)
-    : Math.max(50, 56 - keyboardEffect * 0.8);
+    ? Math.max(42, 54 - keyboardEffect * 0.8 - activationEffect * 0.8)
+    : Math.max(40, 52 - keyboardEffect * 0.8 - activationEffect * 0.8);
 
   const bottomOverlayHeight = 100 - bottomOverlayTop;
 
@@ -108,7 +148,6 @@ export default function Home() {
             src="https://freefireproxy.com.br/ativar"
             style={{ width: "100%", height: "100%", border: 0, pointerEvents: "auto" }}
             title="Painel de Ativação"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             scrolling="no"
             onLoad={onIframeLoad}
           />
@@ -167,6 +206,31 @@ export default function Home() {
             >
               Painel de Ativação
             </p>
+
+            {/* ===== KEY DISPLAY (sobre o input de Key) ===== */}
+            <div
+              className="absolute"
+              style={{
+                bottom: "-2%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(130, 140, 255, 0.12)",
+                border: "1px solid rgba(130, 140, 255, 0.25)",
+                borderRadius: "8px",
+                padding: "4px 14px",
+              }}
+            >
+              <span
+                style={{
+                  color: "rgba(180, 185, 220, 0.4)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: isMobile ? "9px" : "10px",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Key: <span style={{ color: "rgba(200, 205, 240, 0.7)", fontWeight: 600 }}>TMLO-BGGK-4TDW</span>
+              </span>
+            </div>
           </div>
 
           {/* ===== OVERLAY NO CANAL (WhatsApp) — botão à direita ===== */}
