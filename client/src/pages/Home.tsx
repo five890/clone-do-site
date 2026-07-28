@@ -5,6 +5,10 @@ export default function Home() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Detectar teclado virtual (viewport shrink)
+  const [keyboardShift, setKeyboardShift] = useState(0);
+  const initialHeightRef = useRef(window.innerHeight);
+
   const onIframeLoad = useCallback(() => {
     setIframeReady(true);
   }, []);
@@ -15,10 +19,34 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Detectar quando o teclado virtual sobe (viewport encolhe)
+  useEffect(() => {
+    const initialH = window.innerHeight;
+    initialHeightRef.current = initialH;
+
+    const handleResize = () => {
+      const currentH = window.innerHeight;
+      const diff = initialH - currentH;
+      if (diff > 100) {
+        const shiftPercent = (diff / initialH) * 100;
+        setKeyboardShift(shiftPercent);
+      } else {
+        setKeyboardShift(0);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    const interval = setInterval(handleResize, 500);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearInterval(interval);
+    };
   }, []);
 
   // Bloquear scroll
@@ -34,46 +62,81 @@ export default function Home() {
 
   const bgColor = "#060710";
 
-  // Top overlay: cobre tudo do topo até o início do card (escudo, PROXY IOS, Painel de Ativação)
-  // E também as laterais azuis
-  const topOverlayDesktop = { top: "0%", left: "0%", width: "100%", height: "38%" };
-  const bottomOverlayDesktop = { top: "64%", left: "0%", width: "100%", height: "36%" };
+  // Efeito do teclado nos overlays e iframe
+  const keyboardEffect = keyboardShift > 0 ? keyboardShift : 0;
 
-  const topOverlayMobile = { top: "0%", left: "0%", width: "100%", height: "28%" };
-  const bottomOverlayMobile = { top: "64%", left: "0%", width: "100%", height: "36%" };
+  // Scale e translateY do iframe
+  const scaleVal = isMobile ? 1.09 : 1.08;
+  const translateYBase = isMobile ? -18 : -20;
+  const translateYTotal = translateYBase + keyboardEffect * 0.5;
 
-  const topOverlay = isMobile ? topOverlayMobile : topOverlayDesktop;
-  const bottomOverlay = isMobile ? bottomOverlayMobile : bottomOverlayDesktop;
+  // Top overlay: cobre PROXY IOS + escudo
+  const topOverlayHeight = isMobile ? 28 - keyboardEffect * 0.3 : 26 - keyboardEffect * 0.3;
+
+  // Bottom overlay: começa logo após o card (Certificado visível)
+  const bottomOverlayTop = isMobile
+    ? Math.max(50, 58 - keyboardEffect * 0.8)
+    : Math.max(50, 56 - keyboardEffect * 0.8);
+
+  const bottomOverlayHeight = 100 - bottomOverlayTop;
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background select-none">
-      {/* Iframe do site original */}
-      <iframe
-        ref={iframeRef}
-        src="https://freefireproxy.com.br/ativar"
-        className="h-full w-full border-0"
-        title="Painel de Ativação"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        scrolling="no"
-        onLoad={onIframeLoad}
-      />
+
+      {/* ===== CONTAINER DO IFRAME — escalado e reposicionado ===== */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            transform: `scale(${scaleVal}) translateY(${translateYTotal}%)`,
+            transformOrigin: "top center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <iframe
+            ref={iframeRef}
+            src="https://freefireproxy.com.br/ativar"
+            style={{ width: "100%", height: "100%", border: 0 }}
+            title="Painel de Ativação"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            scrolling="no"
+            onLoad={onIframeLoad}
+          />
+        </div>
+      </div>
 
       {iframeReady && (
         <>
-          {/* ===== OVERLAY ESCURO NO TOPO — cobrindo PROXY IOS + escudo + laterais ===== */}
+          {/* ===== OVERLAY ESCURO NO TOPO ===== */}
           <div
             className="absolute pointer-events-none"
-            style={{ ...topOverlay, background: bgColor, zIndex: 40 }}
+            style={{
+              top: "0%",
+              left: "0%",
+              width: "100%",
+              height: `${topOverlayHeight}%`,
+              background: bgColor,
+              zIndex: 40,
+            }}
           />
 
-          {/* ===== COMMUNITY SHELBY — grande, centralizado ===== */}
+          {/* ===== COMMUNITY SHELBY ===== */}
           <div
             className="absolute flex flex-col items-center justify-center"
             style={{
-              top: isMobile ? "4%" : "8%",
+              top: "4%",
               left: "0%",
               width: "100%",
-              height: isMobile ? "22%" : "26%",
+              height: `${topOverlayHeight}%`,
               zIndex: 50,
             }}
           >
@@ -105,10 +168,30 @@ export default function Home() {
             </p>
           </div>
 
-          {/* ===== OVERLAY ESCURO EMBAIXO — cobrindo Certificado, CANAL, Footer, laterais ===== */}
+          {/* ===== OVERLAY NO CANAL (WhatsApp) — botão à direita ===== */}
           <div
             className="absolute pointer-events-none"
-            style={{ ...bottomOverlay, background: bgColor, zIndex: 40 }}
+            style={{
+              top: `${bottomOverlayTop - 3.5}%`,
+              left: "56%",
+              width: "18%",
+              height: "4%",
+              background: bgColor,
+              zIndex: 45,
+            }}
+          />
+
+          {/* ===== OVERLAY ESCURO EMBAIXO ===== */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: `${bottomOverlayTop}%`,
+              left: "0%",
+              width: "100%",
+              height: `${bottomOverlayHeight}%`,
+              background: bgColor,
+              zIndex: 40,
+            }}
           />
         </>
       )}
