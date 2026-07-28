@@ -34,12 +34,12 @@ export default function Home() {
 
   // Posições mobile vs desktop
   const overlayTop = isMobile
-    ? { top: "0%", left: "5%", width: "90%", height: "28%" }
-    : { top: "0%", left: "15%", width: "70%", height: "38%" };
+    ? { top: "0%", left: "5%", width: "90%", height: "32%" }
+    : { top: "0%", left: "15%", width: "70%", height: "42%" };
 
   const communityText = isMobile
-    ? { top: "4%", left: "5%", width: "90%", height: "20%", fontSize: "clamp(18px, 6vw, 36px)" }
-    : { top: "8%", left: "15%", width: "70%", height: "24%", fontSize: "clamp(22px, 4.5vw, 42px)" };
+    ? { top: "6%", left: "5%", width: "90%", height: "22%", fontSize: "clamp(18px, 6vw, 36px)" }
+    : { top: "10%", left: "15%", width: "70%", height: "26%", fontSize: "clamp(22px, 4.5vw, 42px)" };
 
   const discordBtn = isMobile
     ? { top: "66%", left: "53%", width: "42%", height: "5.5%", minWidth: "120px" }
