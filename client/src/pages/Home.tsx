@@ -1,29 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { MonitorPlay } from "lucide-react";
 
-// Design: Overlay dinâmico sobre freefireproxy.com.br/ativar
+// Overlay dinâmico sobre freefireproxy.com.br/ativar
 //
-// Situação ANTES de ativar (viewport 1280x1100, scrollH=1100):
-//   CANAL: top=723px (65.73%), left=646px (50.47%), width=185px (14.45%), height=49px (4.45%)
-//   CERTIFICADO: top=723px, left=449px (35.08%), width=185px
-//   Footer: top=837px (76.09%), left=416px (32.5%), width=448px (35%)
+// Desktop (1280x1100):
+//   CANAL: top=65.73%, left=50.47%, width=14.45%, height=4.45%
+//   CERTIFICADO: top=65.73%, left=35.08%
+//   Footer: top=76.09%, left=32.5%, width=35%
 //
-// Situação DEPOIS de ativar (scrollH=1272):
-//   CANAL: top=491px (44.64%), left=638.5px (49.88%)
-//   CERTIFICADO: top=491px, left=441.5px (34.49%)
-//
-// Estratégia:
-// Discord substitui o CANAL visualmente na MESMA posição (65.73%, 50.47%)
-// Overlay cobre o footer abaixo
-// Overlay secundário cobre CANAL pós-ativação (44.64%)
-// Scroll bloqueado
+// Mobile (375px+): iframe escala, porcentagens mantidas com ajustes
 
 export default function Home() {
   const [iframeReady, setIframeReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  const onIframeLoad = useCallback(() => {
+    setIframeReady(true);
+  }, []);
+
   useEffect(() => {
-    const timer = setTimeout(() => setIframeReady(true), 2000);
+    // Fallback timer caso o onload não dispare
+    const timer = setTimeout(() => setIframeReady(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -31,15 +28,19 @@ export default function Home() {
   useEffect(() => {
     const handler = () => {
       if (iframeRef.current) {
-        iframeRef.current.scrollTop = 0;
+        iframeRef.current.contentWindow?.scrollTo(0, 0);
       }
     };
-    const interval = setInterval(handler, 300);
-    return () => clearInterval(interval);
+    const interval = setInterval(handler, 400);
+    window.addEventListener("scroll", handler);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("scroll", handler);
+    };
   }, []);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-background">
+    <div className="relative h-screen w-screen overflow-hidden bg-background select-none">
       {/* Iframe do site original */}
       <iframe
         ref={iframeRef}
@@ -48,13 +49,16 @@ export default function Home() {
         title="Painel de Ativação"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
         scrolling="no"
+        onLoad={onIframeLoad}
       />
 
       {iframeReady && (
         <>
-          {/* Overlay CANAL original (antes de ativar) — cobre CANAL mas Discord fica por cima */}
+          {/* ===== DESKTOP OVERLAYS ===== */}
+
+          {/* Overlay CANAL original (antes de ativar) — desktop */}
           <div
-            className="absolute pointer-events-none z-50"
+            className="absolute pointer-events-none z-50 hidden sm:block"
             style={{
               top: "65.73%",
               left: "50.47%",
@@ -65,36 +69,36 @@ export default function Home() {
             }}
           />
 
-          {/* Overlay gap entre CANAL e footer */}
+          {/* Overlay gap entre CANAL e footer — desktop */}
           <div
-            className="absolute pointer-events-none z-50"
+            className="absolute pointer-events-none z-50 hidden sm:block"
             style={{
-              top: "calc(65.73% + 4.45%)",
+              top: "70.18%",
               left: "50.47%",
               width: "14.45%",
-              height: "calc(76.09% - 65.73% - 4.45%)",
+              height: "5.91%",
               background: "rgba(10, 12, 30, 0.97)",
             }}
           />
 
-          {/* Overlay footer */}
+          {/* Overlay footer — desktop */}
           <div
-            className="absolute pointer-events-none z-50"
+            className="absolute pointer-events-none z-50 hidden sm:block"
             style={{
               top: "76.09%",
               left: "32.5%",
               width: "35%",
-              height: "2.5%",
+              height: "2%",
               background: "rgba(8, 10, 22, 0.97)",
             }}
           />
 
-          {/* Overlay CANAL pós-ativação (CANAL sobe para 44.64%) */}
+          {/* Overlay CANAL pós-ativação (CANAL sobe) — desktop */}
           <div
-            className="absolute pointer-events-none z-50"
+            className="absolute pointer-events-none z-50 hidden sm:block"
             style={{
-              top: "43.5%",
-              left: "49.5%",
+              top: "43%",
+              left: "49%",
               width: "16%",
               height: "5.5%",
               background: "rgba(10, 12, 30, 0.97)",
@@ -102,14 +106,13 @@ export default function Home() {
             }}
           />
 
-          {/* Botão Discord — substitui o CANAL visualmente na mesma posição */}
+          {/* Botão Discord desktop — substitui CANAL na mesma posição */}
           <a
             href="https://discord.gg/Bzmjkbt8yP"
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute z-[60] flex items-center justify-center gap-2 pointer-events-auto transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+            className="absolute z-[60] flex items-center justify-center gap-2 pointer-events-auto hidden sm:flex transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
             style={{
-              // Mesma posição do CANAL original
               top: "65.5%",
               left: "50.47%",
               width: "14.45%",
@@ -118,7 +121,7 @@ export default function Home() {
               WebkitBackdropFilter: "blur(16px)",
               border: "1px solid rgba(88, 101, 242, 0.3)",
               borderRadius: "0 12px 12px 0",
-              padding: "12px 16px",
+              padding: "12px 14px",
               textDecoration: "none",
               boxShadow: "0 4px 24px rgba(88, 101, 242, 0.2), 0 0 0 1px rgba(255,255,255,0.03) inset",
             }}
@@ -126,6 +129,91 @@ export default function Home() {
             <MonitorPlay className="h-4 w-4 shrink-0" style={{ color: "#7B8CF7" }} />
             <span
               className="text-[12px] font-semibold tracking-wide text-center leading-tight"
+              style={{
+                color: "#D4D8FF",
+                fontFamily: "'Space Grotesk', sans-serif",
+                textShadow: "0 1px 4px rgba(0,0,0,0.3)",
+              }}
+            >
+              Entre no Discord
+            </span>
+          </a>
+
+          {/* ===== MOBILE OVERLAYS ===== */}
+
+          {/* Overlay CANAL — mobile */}
+          <div
+            className="absolute pointer-events-none z-50 block sm:hidden"
+            style={{
+              top: "62%",
+              left: "51%",
+              width: "42%",
+              height: "6%",
+              background: "rgba(10, 12, 30, 0.97)",
+              borderRadius: "0 10px 10px 0",
+            }}
+          />
+
+          {/* Overlay gap — mobile */}
+          <div
+            className="absolute pointer-events-none z-50 block sm:hidden"
+            style={{
+              top: "68%",
+              left: "51%",
+              width: "42%",
+              height: "5%",
+              background: "rgba(10, 12, 30, 0.97)",
+            }}
+          />
+
+          {/* Overlay footer — mobile */}
+          <div
+            className="absolute pointer-events-none z-50 block sm:hidden"
+            style={{
+              top: "73%",
+              left: "22%",
+              width: "56%",
+              height: "3%",
+              background: "rgba(8, 10, 22, 0.97)",
+            }}
+          />
+
+          {/* Overlay CANAL pós-ativação — mobile */}
+          <div
+            className="absolute pointer-events-none z-50 block sm:hidden"
+            style={{
+              top: "42%",
+              left: "50%",
+              width: "44%",
+              height: "7%",
+              background: "rgba(10, 12, 30, 0.97)",
+              borderRadius: "0 10px 10px 0",
+            }}
+          />
+
+          {/* Botão Discord mobile */}
+          <a
+            href="https://discord.gg/Bzmjkbt8yP"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute z-[60] flex items-center justify-center gap-1.5 pointer-events-auto block sm:hidden transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+            style={{
+              top: "61.5%",
+              left: "51%",
+              width: "42%",
+              background: "linear-gradient(135deg, rgba(88, 101, 242, 0.22) 0%, rgba(88, 101, 242, 0.14) 100%)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(88, 101, 242, 0.3)",
+              borderRadius: "0 10px 10px 0",
+              padding: "10px 12px",
+              textDecoration: "none",
+              boxShadow: "0 4px 24px rgba(88, 101, 242, 0.2), 0 0 0 1px rgba(255,255,255,0.03) inset",
+            }}
+          >
+            <MonitorPlay className="h-3.5 w-3.5 shrink-0" style={{ color: "#7B8CF7" }} />
+            <span
+              className="text-[11px] font-semibold tracking-wide text-center leading-tight"
               style={{
                 color: "#D4D8FF",
                 fontFamily: "'Space Grotesk', sans-serif",
@@ -143,7 +231,9 @@ export default function Home() {
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-3">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-            <p className="text-sm text-muted-foreground">Carregando painel...</p>
+            <p className="text-sm text-muted-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Carregando painel...
+            </p>
           </div>
         </div>
       )}
