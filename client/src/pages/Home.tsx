@@ -55,7 +55,7 @@ export default function Home() {
               left: "22%",
               width: "56%",
               height: "42%",
-              background: "rgba(8, 10, 22, 0.98)",
+              background: "rgba(5, 6, 15, 1.0)",
             }}
           />
 
@@ -127,7 +127,7 @@ export default function Home() {
               left: "25%",
               width: "50%",
               height: "3%",
-              background: "rgba(8, 10, 22, 0.98)",
+              background: "rgba(5, 6, 15, 1.0)",
             }}
           />
         </>
