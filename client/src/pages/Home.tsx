@@ -141,15 +141,15 @@ export default function Home() {
 
       {iframeReady && (
         <>
-          {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP — redireciona para Discord ===== */}
-          {/* Cobre SOMENTE a área abaixo do ATIVAR ACESSO onde o WhatsApp aparece */}
+          {/* ===== OVERLAY INVISÍVEL SOBRE O CANAL (WHATSAPP) — redireciona para Discord ===== */}
+          {/* Cobre SOMENTE o botão CANAL que fica na parte inferior do card */}
           <div
             className="absolute"
             style={{
-              top: `${isMobile ? 52 : 50}%`,
-              left: "18%",
-              width: "35%",
-              height: `${isMobile ? 10 : 9}%`,
+              top: `${isMobile ? 68 : 65}%`,
+              left: `${isMobile ? 55 : 52}%`,
+              width: `${isMobile ? 40 : 42}%`,
+              height: `${isMobile ? 5 : 4.5}%`,
               zIndex: 100,
               cursor: "pointer",
               pointerEvents: "auto",
