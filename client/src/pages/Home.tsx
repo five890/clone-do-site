@@ -116,6 +116,19 @@ export default function Home() {
 
       {iframeReady && (
         <>
+          {/* ===== OVERLAY PRETO COBRINDO A ÁREA ABAIXO DO ATIVAR ACESSO ===== */}
+          <div
+            className="absolute"
+            style={{
+              top: "46%",
+              left: 0,
+              width: "100%",
+              height: "54%",
+              zIndex: 5,
+              background: "#000000",
+            }}
+          />
+
           {/* ===== OVERLAY INVISÍVEL SOBRE O CANAL — position: fixed, z-index máximo ===== */}
           <div
             style={{
