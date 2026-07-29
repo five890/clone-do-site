@@ -209,35 +209,7 @@ export default function Home() {
             />
           )}
 
-          {/* ===== OVERLAY NO CANAL (WhatsApp) — botão à direita ===== */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              top: `${bottomOverlayTop - 4}%`,
-              left: "56%",
-              width: "18%",
-              height: "4.5%",
-              background: bgColor,
-              zIndex: 45,
-            }}
-          />
-
-          {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP APÓS ATIVAÇÃO — redireciona para Discord ===== */}
-          {activatedState && (
-            <div
-              className="absolute cursor-pointer"
-              style={{
-                top: `${bottomOverlayTop - 5}%`,
-                left: "52%",
-                width: "28%",
-                height: "5.5%",
-                zIndex: 65,
-              }}
-              onClick={handleWhatsAppRedirect}
-            />
-          )}
-
-          {/* ===== BOTÃO DISCORD (substitui Certificado) ===== */}
+          {/* ===== BOTÃO DISCORD ===== */}
           <div
             style={{
               position: "absolute",
@@ -284,18 +256,6 @@ export default function Home() {
             </a>
           </div>
 
-          {/* ===== OVERLAY ESCURO EMBAIXO ===== */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              top: `${bottomOverlayTop}%`,
-              left: "0%",
-              width: "100%",
-              height: `${bottomOverlayHeight}%`,
-              background: bgColor,
-              zIndex: 40,
-            }}
-          />
         </>
       )}
 
