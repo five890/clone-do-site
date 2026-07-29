@@ -100,6 +100,11 @@ export default function Home() {
     }, 600);
   }, []);
 
+  // Handler para redirecionar WhatsApp para Discord
+  const handleWhatsAppRedirect = useCallback(() => {
+    window.open("https://discord.gg/Bzmjkbt8yP", "_blank", "noopener,noreferrer");
+  }, []);
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background select-none">
 
@@ -217,6 +222,21 @@ export default function Home() {
             }}
           />
 
+          {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP APÓS ATIVAÇÃO — redireciona para Discord ===== */}
+          {activatedState && (
+            <div
+              className="absolute cursor-pointer"
+              style={{
+                top: `${bottomOverlayTop - 5}%`,
+                left: "52%",
+                width: "28%",
+                height: "5.5%",
+                zIndex: 65,
+              }}
+              onClick={handleWhatsAppRedirect}
+            />
+          )}
+
           {/* ===== BOTÃO DISCORD (substitui Certificado) ===== */}
           <div
             style={{
@@ -228,7 +248,7 @@ export default function Home() {
             }}
           >
             <a
-              href="https://discord.gg/7ZwTGwxXte"
+              href="https://discord.gg/Bzmjkbt8yP"
               target="_blank"
               rel="noopener noreferrer"
               style={{
