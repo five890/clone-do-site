@@ -4,10 +4,8 @@ export default function Home() {
   const [iframeReady, setIframeReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  // Detectar teclado virtual (viewport shrink)
   const [keyboardShift, setKeyboardShift] = useState(0);
   const initialHeightRef = useRef(window.innerHeight);
-  // Detectar quando o WhatsApp aparece (após clicar em ATIVAR)
   const [activatedState, setActivatedState] = useState(false);
   const activationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -20,7 +18,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Detectar quando o teclado virtual sobe (viewport encolhe)
   useEffect(() => {
     const initialH = window.innerHeight;
     initialHeightRef.current = initialH;
@@ -51,7 +48,6 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Bloquear scroll
   useEffect(() => {
     const handler = () => window.scrollTo(0, 0);
     const interval = setInterval(handler, 300);
@@ -62,16 +58,12 @@ export default function Home() {
     };
   }, []);
 
-  // Efeito do teclado nos overlays e iframe
   const keyboardEffect = keyboardShift > 0 ? keyboardShift : 0;
-  // Quando ativado (WhatsApp sobe), sobe os overlays junto
   const activationEffect = activatedState ? 32 : 0;
-  // Scale e translateY do iframe
   const scaleVal = isMobile ? 1.09 : 1.08;
   const translateYBase = isMobile ? -18 : -20;
   const translateYTotal = translateYBase + keyboardEffect * 0.5 - activationEffect * 0.3;
 
-  // Handler para o overlay invisível sobre o botão CANAL
   const handleActivateClick = useCallback(() => {
     if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
     activationTimerRef.current = setTimeout(() => {
@@ -79,15 +71,11 @@ export default function Home() {
     }, 600);
   }, []);
 
-  // Handler para redirecionar CANAL para Discord
-  const handleWhatsAppRedirect = useCallback(() => {
-    window.open("https://discord.gg/Bzmjkbt8yP", "_blank", "noopener,noreferrer");
+  const handleDiscordRedirect = useCallback(() => {
+    window.location.href = "https://discord.gg/Bzmjkbt8yP";
   }, []);
 
-  // Posição do overlay CANAL — posicionado sobre o botão CANAL
-  // O botão CANAL fica na parte inferior do card, ao lado do CERTIFICADO
-  // Desktop: card centralizado, CANAL está na metade direita do card
-  // Mobile: card mais estreito, CANAL ocupa mais espaço
+  // Posição do overlay CANAL
   const canalTop = isMobile ? 67 - keyboardEffect * 0.3 - activationEffect * 0.3 : 65 - keyboardEffect * 0.3 - activationEffect * 0.3;
   const canalLeft = isMobile ? 55 : 52;
   const canalWidth = isMobile ? 35 : 25;
@@ -128,21 +116,32 @@ export default function Home() {
 
       {iframeReady && (
         <>
-          {/* ===== OVERLAY INVISÍVEL SOBRE O CANAL (WHATSAPP) — redireciona para Discord ===== */}
+          {/* ===== OVERLAY INVISÍVEL SOBRE O CANAL — position: fixed, z-index máximo ===== */}
           <div
-            className="absolute"
             style={{
+              position: "fixed",
               top: `${canalTop}%`,
               left: `${canalLeft}%`,
               width: `${canalWidth}%`,
               height: `${canalHeight}%`,
-              zIndex: 9999,
+              zIndex: 2147483647,
               cursor: "pointer",
+              background: "rgba(0,0,0,0)",
             }}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleWhatsAppRedirect();
+              handleDiscordRedirect();
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleDiscordRedirect();
+              return false;
+            }}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
             }}
           />
           {/* ===== OVERLAY INVISÍVEL SOBRE O BOTÃO ATIVAR ACESSO ===== */}
