@@ -141,59 +141,6 @@ export default function Home() {
 
       {iframeReady && (
         <>
-          {/* ===== OVERLAY ESCURO NO TOPO ===== */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              top: "0%",
-              left: "0%",
-              width: "100%",
-              height: `${topOverlayHeight}%`,
-              background: bgColor,
-              zIndex: 40,
-            }}
-          />
-
-          {/* ===== COMMUNITY SHELBY ===== */}
-          <div
-            className="absolute flex flex-col items-center justify-center"
-            style={{
-              top: "4%",
-              left: "0%",
-              width: "100%",
-              height: `${topOverlayHeight}%`,
-              zIndex: 50,
-            }}
-          >
-            <h1
-              style={{
-                color: "#FFFFFF",
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: isMobile ? "clamp(18px, 6vw, 36px)" : "clamp(22px, 4.5vw, 42px)",
-                fontWeight: 800,
-                letterSpacing: "0.02em",
-                lineHeight: 1.1,
-                textShadow: "0 0 30px rgba(130, 140, 255, 0.3)",
-              }}
-              className="text-center uppercase"
-            >
-              Community Shelby
-            </h1>
-            <p
-              style={{
-                color: "rgba(180, 185, 220, 0.5)",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: isMobile ? "clamp(8px, 2vw, 12px)" : "clamp(9px, 1.2vw, 14px)",
-                letterSpacing: "0.35em",
-                marginTop: "6px",
-              }}
-              className="text-center uppercase"
-            >
-              Painel de Ativação
-            </p>
-
-          </div>
-
           {/* ===== OVERLAY INVISÍVEL SOBRE O BOTÃO ATIVAR (detecta clique) ===== */}
           {!activatedState && (
             <div
