@@ -22,39 +22,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Detectar clique no botão Ativar ACESSO (via coordenadas do iframe)
-  useEffect(() => {
-    if (!iframeReady) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const rect = iframeRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const iframeWidth = rect.width;
-      const iframeHeight = rect.height;
-      const scaleX = x / iframeWidth;
-      const scaleY = y / iframeHeight;
-
-      // Botão ATIVAR ACESSO está no centro horizontal, ~44-49% vertical (relativo ao iframe)
-      if (scaleX > 0.25 && scaleX < 0.75 && scaleY > 0.42 && scaleY < 0.51) {
-        // Após ~800ms o WhatsApp deve subir
-        if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
-        activationTimerRef.current = setTimeout(() => {
-          setActivatedState(true);
-        }, 1000);
-      }
-    };
-
-    document.addEventListener("click", handleClick);
-    return () => {
-      document.removeEventListener("click", handleClick);
-      if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
-    };
-  }, [iframeReady]);
-
   // Detectar quando o teclado virtual sobe (viewport encolhe)
   useEffect(() => {
     const initialH = window.innerHeight;
@@ -103,7 +70,7 @@ export default function Home() {
   const keyboardEffect = keyboardShift > 0 ? keyboardShift : 0;
 
   // Quando ativado (WhatsApp sobe), sobe os overlays junto
-  const activationEffect = activatedState ? 14 : 0;
+  const activationEffect = activatedState ? 32 : 0;
 
   // Scale e translateY do iframe
   const scaleVal = isMobile ? 1.09 : 1.08;
@@ -115,10 +82,23 @@ export default function Home() {
 
   // Bottom overlay: sobe quando WhatsApp aparece
   const bottomOverlayTop = isMobile
-    ? Math.max(42, 54 - keyboardEffect * 0.8 - activationEffect * 0.8)
-    : Math.max(40, 52 - keyboardEffect * 0.8 - activationEffect * 0.8);
+    ? Math.max(24, 54 - keyboardEffect * 0.8 - activationEffect * 0.65)
+    : Math.max(22, 52 - keyboardEffect * 0.8 - activationEffect * 0.65);
 
-  const bottomOverlayHeight = 100 - bottomOverlayTop;
+  const bottomOverlayHeight = 100 - bottomOverlayTop + 12;
+
+  // Posição do botão ATIVAR no viewport (relativo à viewport)
+  // O botão está ~42-48% vertical, ~20-80% horizontal
+  const activateBtnTop = isMobile ? 43 : 42;
+  const activateBtnHeight = 5;
+
+  // Handler para o overlay invisível sobre o botão ATIVAR
+  const handleActivateClick = useCallback(() => {
+    if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
+    activationTimerRef.current = setTimeout(() => {
+      setActivatedState(true);
+    }, 600);
+  }, []);
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background select-none">
@@ -209,14 +189,29 @@ export default function Home() {
 
           </div>
 
+          {/* ===== OVERLAY INVISÍVEL SOBRE O BOTÃO ATIVAR (detecta clique) ===== */}
+          {!activatedState && (
+            <div
+              className="absolute cursor-pointer"
+              style={{
+                top: `${activateBtnTop}%`,
+                left: "15%",
+                width: "70%",
+                height: `${activateBtnHeight}%`,
+                zIndex: 60,
+              }}
+              onClick={handleActivateClick}
+            />
+          )}
+
           {/* ===== OVERLAY NO CANAL (WhatsApp) — botão à direita ===== */}
           <div
             className="absolute pointer-events-none"
             style={{
-              top: `${bottomOverlayTop - 3.5}%`,
+              top: `${bottomOverlayTop - 4}%`,
               left: "56%",
               width: "18%",
-              height: "4%",
+              height: "4.5%",
               background: bgColor,
               zIndex: 45,
             }}
@@ -226,7 +221,7 @@ export default function Home() {
           <div
             style={{
               position: "absolute",
-              bottom: "6%",
+              bottom: "4%",
               left: "50%",
               transform: "translateX(-50%)",
               zIndex: 55,
