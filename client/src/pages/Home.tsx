@@ -213,13 +213,15 @@ export default function Home() {
           {/* O WhatsApp aparece abaixo do ATIVAR, ~55-62% vertical, ~15-40% horizontal */}
           {activatedState && (
             <div
-              className="absolute cursor-pointer"
+              className="absolute"
               style={{
                 top: `${isMobile ? 55 : 53}%`,
                 left: "15%",
                 width: "30%",
                 height: `${isMobile ? 7 : 8}%`,
-                zIndex: 65,
+                zIndex: 100,
+                cursor: "pointer",
+                pointerEvents: "auto",
               }}
               onClick={handleWhatsAppRedirect}
             />
