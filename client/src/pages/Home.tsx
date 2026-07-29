@@ -209,6 +209,21 @@ export default function Home() {
             />
           )}
 
+          {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP APÓS ATIVAÇÃO — redireciona para Discord ===== */}
+          {activatedState && (
+            <div
+              className="absolute cursor-pointer"
+              style={{
+                top: `${bottomOverlayTop - 5}%`,
+                left: "52%",
+                width: "28%",
+                height: "5.5%",
+                zIndex: 65,
+              }}
+              onClick={handleWhatsAppRedirect}
+            />
+          )}
+
         </>
       )}
 
