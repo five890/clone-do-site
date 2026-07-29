@@ -142,14 +142,14 @@ export default function Home() {
       {iframeReady && (
         <>
           {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP — redireciona para Discord ===== */}
-          {/* Cobre a área abaixo do ATIVAR ACESSO onde o WhatsApp aparece */}
+          {/* Cobre SOMENTE a área abaixo do ATIVAR ACESSO onde o WhatsApp aparece */}
           <div
             className="absolute"
             style={{
-              top: `${isMobile ? 46 : 44}%`,
+              top: `${isMobile ? 52 : 50}%`,
               left: "18%",
               width: "35%",
-              height: `${isMobile ? 8 : 7}%`,
+              height: `${isMobile ? 10 : 9}%`,
               zIndex: 100,
               cursor: "pointer",
               pointerEvents: "auto",
