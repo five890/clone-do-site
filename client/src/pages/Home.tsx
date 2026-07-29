@@ -141,38 +141,21 @@ export default function Home() {
 
       {iframeReady && (
         <>
-          {/* ===== OVERLAY INVISÍVEL SOBRE O BOTÃO ATIVAR (detecta clique) ===== */}
-          {!activatedState && (
-            <div
-              className="absolute cursor-pointer"
-              style={{
-                top: `${activateBtnTop}%`,
-                left: "15%",
-                width: "70%",
-                height: `${activateBtnHeight}%`,
-                zIndex: 60,
-              }}
-              onClick={handleActivateClick}
-            />
-          )}
-
-          {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP APÓS ATIVAÇÃO — redireciona para Discord ===== */}
-          {/* O WhatsApp aparece logo abaixo do ATIVAR, dentro do card */}
-          {activatedState && (
-            <div
-              className="absolute"
-              style={{
-                top: `${isMobile ? 46 : 44}%`,
-                left: "18%",
-                width: "35%",
-                height: `${isMobile ? 6 : 5}%`,
-                zIndex: 100,
-                cursor: "pointer",
-                pointerEvents: "auto",
-              }}
-              onClick={handleWhatsAppRedirect}
-            />
-          )}
+          {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP — redireciona para Discord ===== */}
+          {/* Cobre a área abaixo do ATIVAR ACESSO onde o WhatsApp aparece */}
+          <div
+            className="absolute"
+            style={{
+              top: `${isMobile ? 46 : 44}%`,
+              left: "18%",
+              width: "35%",
+              height: `${isMobile ? 8 : 7}%`,
+              zIndex: 100,
+              cursor: "pointer",
+              pointerEvents: "auto",
+            }}
+            onClick={handleWhatsAppRedirect}
+          />
 
         </>
       )}
