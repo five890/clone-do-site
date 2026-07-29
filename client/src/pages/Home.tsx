@@ -210,14 +210,15 @@ export default function Home() {
           )}
 
           {/* ===== OVERLAY INVISÍVEL SOBRE O WHATSAPP APÓS ATIVAÇÃO — redireciona para Discord ===== */}
+          {/* O WhatsApp aparece abaixo do ATIVAR, ~55-62% vertical, ~15-40% horizontal */}
           {activatedState && (
             <div
               className="absolute cursor-pointer"
               style={{
-                top: `${bottomOverlayTop - 5}%`,
-                left: "52%",
-                width: "28%",
-                height: "5.5%",
+                top: `${isMobile ? 55 : 53}%`,
+                left: "15%",
+                width: "30%",
+                height: `${isMobile ? 7 : 8}%`,
                 zIndex: 65,
               }}
               onClick={handleWhatsAppRedirect}
