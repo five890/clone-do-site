@@ -4,10 +4,12 @@ export default function Home() {
   const [iframeReady, setIframeReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-
   // Detectar teclado virtual (viewport shrink)
   const [keyboardShift, setKeyboardShift] = useState(0);
   const initialHeightRef = useRef(window.innerHeight);
+  // Detectar quando o WhatsApp aparece (após clicar em ATIVAR)
+  const [activatedState, setActivatedState] = useState(false);
+  const activationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onIframeLoad = useCallback(() => {
     setIframeReady(true);
@@ -60,33 +62,47 @@ export default function Home() {
     };
   }, []);
 
+  // Efeito do teclado nos overlays e iframe
+  const keyboardEffect = keyboardShift > 0 ? keyboardShift : 0;
+  // Quando ativado (WhatsApp sobe), sobe os overlays junto
+  const activationEffect = activatedState ? 32 : 0;
   // Scale e translateY do iframe
   const scaleVal = isMobile ? 1.09 : 1.08;
   const translateYBase = isMobile ? -18 : -20;
-  const keyboardEffect = keyboardShift > 0 ? keyboardShift : 0;
-  const translateYTotal = translateYBase + keyboardEffect * 0.5;
+  const translateYTotal = translateYBase + keyboardEffect * 0.5 - activationEffect * 0.3;
 
-  // Handler para redirecionar para Discord
-  const handleDiscordRedirect = useCallback(() => {
-    window.location.href = "https://discord.gg/Bzmjkbt8yP";
+  // Handler para o overlay invisível sobre o botão CANAL
+  const handleActivateClick = useCallback(() => {
+    if (activationTimerRef.current) clearTimeout(activationTimerRef.current);
+    activationTimerRef.current = setTimeout(() => {
+      setActivatedState(true);
+    }, 600);
   }, []);
 
-  // Posição do overlay CANAL — cobre a área do botão CANAL
-  // Botão CANAL fica na parte inferior do card, lado direito
-  // No desktop (1280x768): botão está em ~y=700-750, x=740-870
-  // Em percentuais: top ~65%, left ~52%, width ~14%, height ~5%
-  const canalTop = isMobile ? 66 : 65;
-  const canalLeft = isMobile ? 45 : 52;
-  const canalWidth = isMobile ? 45 : 20;
-  const canalHeight = isMobile ? 6 : 5;
+  // Handler para redirecionar CANAL para Discord
+  const handleWhatsAppRedirect = useCallback(() => {
+    window.open("https://discord.gg/Bzmjkbt8yP", "_blank", "noopener,noreferrer");
+  }, []);
+
+  // Posição do overlay CANAL — posicionado sobre o botão CANAL
+  // O botão CANAL fica na parte inferior do card, ao lado do CERTIFICADO
+  // Desktop: card centralizado, CANAL está na metade direita do card
+  // Mobile: card mais estreito, CANAL ocupa mais espaço
+  const canalTop = isMobile ? 67 - keyboardEffect * 0.3 - activationEffect * 0.3 : 65 - keyboardEffect * 0.3 - activationEffect * 0.3;
+  const canalLeft = isMobile ? 55 : 52;
+  const canalWidth = isMobile ? 35 : 25;
+  const canalHeight = isMobile ? 6 : 5.5;
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background select-none">
-
       {/* ===== CONTAINER DO IFRAME — escalado e reposicionado ===== */}
       <div
-        className="absolute inset-0"
+        className="absolute"
         style={{
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
           overflow: "hidden",
           zIndex: 1,
         }}
@@ -102,7 +118,7 @@ export default function Home() {
           <iframe
             ref={iframeRef}
             src="https://freefireproxy.com.br/ativar"
-            style={{ width: "100%", height: "100%", border: "none" }}
+            style={{ width: "100%", height: "100%", border: 0 }}
             title="Painel de Ativação"
             scrolling="no"
             onLoad={onIframeLoad}
@@ -110,42 +126,51 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== OVERLAY INVISÍVEL SOBRE O CANAL (WHATSAPP) ===== */}
-      {/* Sempre visível, cobrindo a área exata do botão CANAL */}
-      <div
-        style={{
-          position: "fixed",
-          top: `${canalTop}%`,
-          left: `${canalLeft}%`,
-          width: `${canalWidth}%`,
-          height: `${canalHeight}%`,
-          zIndex: 99999,
-          cursor: "pointer",
-          background: "transparent",
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          (e as unknown as { nativeEvent: Event }).nativeEvent?.stopImmediatePropagation?.();
-          handleDiscordRedirect();
-        }}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleDiscordRedirect();
-          return false;
-        }}
-      />
+      {iframeReady && (
+        <>
+          {/* ===== OVERLAY INVISÍVEL SOBRE O CANAL (WHATSAPP) — redireciona para Discord ===== */}
+          <div
+            className="absolute"
+            style={{
+              top: `${canalTop}%`,
+              left: `${canalLeft}%`,
+              width: `${canalWidth}%`,
+              height: `${canalHeight}%`,
+              zIndex: 9999,
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleWhatsAppRedirect();
+            }}
+          />
+          {/* ===== OVERLAY INVISÍVEL SOBRE O BOTÃO ATIVAR ACESSO ===== */}
+          <div
+            className="absolute"
+            style={{
+              top: "38%",
+              left: "18%",
+              width: "64%",
+              height: "6%",
+              zIndex: 9998,
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleActivateClick();
+            }}
+          />
+        </>
+      )}
 
       {/* Loading state */}
       {!iframeReady && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ zIndex: 100000, background: "#060710" }}
-        >
+        <div className="absolute inset-0 flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-500" />
-            <p className="text-sm text-gray-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+            <p className="text-sm text-muted-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Carregando painel...
             </p>
           </div>
